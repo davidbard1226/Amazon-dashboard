@@ -43,57 +43,49 @@ async function getBrowser() {
         ]
     };
 
-    // If on Render, find the locally installed chrome
-    if (process.env.RENDER) {
-        console.log(`[Puppeteer] RENDER detected. CWD: ${process.cwd()}, Dirname: ${__dirname}`);
+    // If on Render or Linux, find the locally installed chrome
+    if (process.env.RENDER || process.platform === 'linux') {
         const cachePath = path.join(__dirname, '.cache', 'puppeteer');
 
-        const findExecutable = (dir, depth = 0) => {
-            if (depth > 5) return null; // Avoid too deep recursion
-            if (!fs.existsSync(dir)) return null;
+        // We know the exact version/path from Render logs: 
+        // /opt/render/project/src/.cache/puppeteer/chrome-headless-shell/linux-145.0.7632.26/chrome-headless-shell-linux64/chrome-headless-shell
+        // We'll try to find it first, then search
+        const knownPath = path.join(cachePath, 'chrome-headless-shell', 'linux-145.0.7632.26', 'chrome-headless-shell-linux64', 'chrome-headless-shell');
 
-            const files = fs.readdirSync(dir);
-            console.log(`[Puppeteer] Searching ${dir}: ${files.join(', ')}`);
-
-            for (const file of files) {
-                const fullPath = path.join(dir, file);
-                try {
-                    const stat = fs.statSync(fullPath);
-                    if (stat.isDirectory()) {
-                        const found = findExecutable(fullPath, depth + 1);
-                        if (found) return found;
-                    } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome' || file === 'chrome-headless-shell') {
-                        // Check if it's executable
-                        try {
-                            fs.accessSync(fullPath, fs.constants.X_OK);
-                            return fullPath;
-                        } catch (e) {
-                            console.log(`[Puppeteer] Found ${file} but it's not executable. Fixing...`);
-                            fs.chmodSync(fullPath, 0o755);
+        if (fs.existsSync(knownPath)) {
+            options.executablePath = knownPath;
+            console.log(`[Puppeteer] Using known Render path: ${options.executablePath}`);
+        } else {
+            // Recursive search fallback
+            const findExecutable = (dir, depth = 0) => {
+                if (depth > 6) return null;
+                if (!fs.existsSync(dir)) return null;
+                const files = fs.readdirSync(dir);
+                for (const file of files) {
+                    const fullPath = path.join(dir, file);
+                    try {
+                        const stat = fs.statSync(fullPath);
+                        if (stat.isDirectory()) {
+                            const found = findExecutable(fullPath, depth + 1);
+                            if (found) return found;
+                        } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome' || file === 'chrome-headless-shell') {
                             return fullPath;
                         }
-                    }
-                } catch (e) { }
-            }
-            return null;
-        };
-
-        try {
-            console.log(`[Puppeteer] Checking for local browser in: ${cachePath}`);
+                    } catch (e) { }
+                }
+                return null;
+            };
             options.executablePath = findExecutable(cachePath);
-            if (options.executablePath) {
-                console.log(`[Puppeteer] SUCCESS: Found browser at: ${options.executablePath}`);
-            } else {
-                console.warn(`[Puppeteer] WARNING: Browser executable not found in cache.`);
-            }
-        } catch (e) {
-            console.error(`[Puppeteer] Error during browser search: ${e.message}`);
         }
 
-        // Fallback to standard path if search fails
+        // Final fallback
         if (!options.executablePath) {
             options.executablePath = '/usr/bin/google-chrome';
-            console.log(`[Puppeteer] Falling back to: ${options.executablePath}`);
+        }
+
+        // Ensure executable
+        if (options.executablePath && fs.existsSync(options.executablePath)) {
+            try { fs.chmodSync(options.executablePath, 0o755); } catch (e) { }
         }
     }
 
