@@ -506,6 +506,13 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
+      // DEBUG: Check for CAPTCHA or blocking
+      if (html.includes('api-services-support@amazon.com') || html.includes('captcha') || html.includes('automated access')) {
+        console.error(`[Scraper] ${asin}: Blocked or CAPTCHA detected!`);
+        logDebug(`${asin}: Cloud blocked by Amazon. Retrying next...`, true);
+        return null;
+      }
+
       // TITLE
       let title = allProducts[asin]?.title || "ASIN: " + asin;
       const titleEl = doc.getElementById('productTitle') || doc.querySelector('meta[name="title"]');
@@ -520,6 +527,7 @@
       const hasPriceOnMain = mainPriceBlock && mainPriceBlock.querySelector('.a-price');
 
       let useOfferListing = !hasPriceOnMain || buyingOptionsLink;
+      console.log(`[Scraper] ${asin}: useOfferListing=${useOfferListing}, hasPriceOnMain=${!!hasPriceOnMain}`);
       let price = "N/A", seller = "Amazon.co.za";
 
       if (useOfferListing) {
@@ -803,6 +811,28 @@
       document.getElementById('progressContainer').style.display = 'none';
       renderAll();
       if (failed > 0) alert(`Refresh complete. ${failed} products failed to update.`);
+    }
+
+    function exportHistory() {
+      const data = Object.keys(allProducts).map(asin => {
+        const p = allProducts[asin];
+        return {
+          'ASIN': asin,
+          'SKU': p.sku || "",
+          'Title': p.title,
+          'My Selling': p.myPrice,
+          'Stock': p.stock || 0
+        };
+      });
+      const csv = Papa.unparse(data);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `amazon_backup_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function importCSV() {
