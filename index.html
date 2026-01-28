@@ -547,12 +547,19 @@
             const pEl = b.querySelector('.a-price .a-offscreen');
             if (pEl) price = pEl.textContent.trim();
 
-            const sLink = b.querySelector('a[href*="seller="], a[aria-label*="Opens a new page"], #aod-offer-soldBy a');
-            if (sLink) seller = sLink.textContent.trim();
-            else {
-              const text = b.textContent;
-              const m = text.match(/Sold by\s+([^.\n]+)/i);
-              if (m) seller = m[1].trim();
+            const sLink = b.querySelector('a[href*="seller="], a[aria-label*="sold by"], a[aria-label*="Opens a new page"], #aod-offer-soldBy a');
+            const potentialSeller = sLink ? sLink.textContent.trim() : "";
+
+            if (potentialSeller && potentialSeller.length > 1) {
+              seller = potentialSeller;
+            } else {
+              const text = b.innerText || b.textContent || "";
+              const m = text.match(/Sold by\s+([^.\n|,\r\t]+)/i);
+              if (m && m[1].trim().length > 1) {
+                seller = m[1].trim();
+              } else if (text.includes("Sold by Amazon") || text.includes("Ships from Amazon")) {
+                seller = "Amazon.co.za";
+              }
             }
           }
         }
