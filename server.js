@@ -45,35 +45,55 @@ async function getBrowser() {
 
     // If on Render, find the locally installed chrome
     if (process.env.RENDER) {
-        const cachePath = path.join(process.cwd(), '.cache', 'puppeteer');
-        // Puppeteer installs in a nested folder: .cache/puppeteer/chrome/linux-<version>/chrome-linux64/chrome
-        // We will try to find any executable named 'chrome' or 'chromium' in that tree
-        const findExecutable = (dir) => {
+        console.log(`[Puppeteer] RENDER detected. CWD: ${process.cwd()}, Dirname: ${__dirname}`);
+        const cachePath = path.join(__dirname, '.cache', 'puppeteer');
+
+        const findExecutable = (dir, depth = 0) => {
+            if (depth > 5) return null; // Avoid too deep recursion
+            if (!fs.existsSync(dir)) return null;
+
             const files = fs.readdirSync(dir);
+            console.log(`[Puppeteer] Searching ${dir}: ${files.join(', ')}`);
+
             for (const file of files) {
                 const fullPath = path.join(dir, file);
-                if (fs.statSync(fullPath).isDirectory()) {
-                    const found = findExecutable(fullPath);
-                    if (found) return found;
-                } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome') {
-                    return fullPath;
-                }
+                try {
+                    const stat = fs.statSync(fullPath);
+                    if (stat.isDirectory()) {
+                        const found = findExecutable(fullPath, depth + 1);
+                        if (found) return found;
+                    } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome') {
+                        // Check if it's executable
+                        try {
+                            fs.accessSync(fullPath, fs.constants.X_OK);
+                            return fullPath;
+                        } catch (e) {
+                            console.log(`[Puppeteer] Found ${file} but it's not executable. Fixing...`);
+                            fs.chmodSync(fullPath, 0o755);
+                            return fullPath;
+                        }
+                    }
+                } catch (e) { }
             }
             return null;
         };
 
         try {
-            if (fs.existsSync(cachePath)) {
-                options.executablePath = findExecutable(cachePath);
-                console.log(`[Puppeteer] Found browser at: ${options.executablePath}`);
+            console.log(`[Puppeteer] Checking for local browser in: ${cachePath}`);
+            options.executablePath = findExecutable(cachePath);
+            if (options.executablePath) {
+                console.log(`[Puppeteer] SUCCESS: Found browser at: ${options.executablePath}`);
+            } else {
+                console.warn(`[Puppeteer] WARNING: Browser executable not found in cache.`);
             }
         } catch (e) {
-            console.error(`[Puppeteer] Error finding browser: ${e.message}`);
+            console.error(`[Puppeteer] Error during browser search: ${e.message}`);
         }
 
         // Fallback to standard path if search fails
         if (!options.executablePath) {
             options.executablePath = '/usr/bin/google-chrome';
+            console.log(`[Puppeteer] Falling back to: ${options.executablePath}`);
         }
     }
 
