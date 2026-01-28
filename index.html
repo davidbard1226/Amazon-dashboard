@@ -547,7 +547,12 @@
             const pEl = b.querySelector('.a-price .a-offscreen');
             if (pEl) price = pEl.textContent.trim();
 
-            const sLink = b.querySelector('a[href*="seller="], a[aria-label*="sold by"], a[aria-label*="Opens a new page"], #aod-offer-soldBy a');
+            const sLink = Array.from(b.querySelectorAll('a[href*="seller="], a[aria-label*="sold by"], a[aria-label*="Opens a new page"], #aod-offer-soldBy a'))
+              .find(el => {
+                const t = el.textContent.trim();
+                return t && t !== "Details" && t !== "Return details" && !t.includes("delivery costs");
+              });
+
             const potentialSeller = sLink ? sLink.textContent.trim() : "";
 
             if (potentialSeller && potentialSeller.length > 1) {
