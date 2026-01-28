@@ -62,7 +62,7 @@ async function getBrowser() {
                     if (stat.isDirectory()) {
                         const found = findExecutable(fullPath, depth + 1);
                         if (found) return found;
-                    } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome') {
+                    } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome' || file === 'chrome-headless-shell') {
                         // Check if it's executable
                         try {
                             fs.accessSync(fullPath, fs.constants.X_OK);
