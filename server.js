@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const path = require('path');
+const fs = require('fs'); // Added fs module
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -42,9 +43,38 @@ async function getBrowser() {
         ]
     };
 
-    // If on Render, use a simpler launch
+    // If on Render, find the locally installed chrome
     if (process.env.RENDER) {
-        options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome';
+        const cachePath = path.join(process.cwd(), '.cache', 'puppeteer');
+        // Puppeteer installs in a nested folder: .cache/puppeteer/chrome/linux-<version>/chrome-linux64/chrome
+        // We will try to find any executable named 'chrome' or 'chromium' in that tree
+        const findExecutable = (dir) => {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+                const fullPath = path.join(dir, file);
+                if (fs.statSync(fullPath).isDirectory()) {
+                    const found = findExecutable(fullPath);
+                    if (found) return found;
+                } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome') {
+                    return fullPath;
+                }
+            }
+            return null;
+        };
+
+        try {
+            if (fs.existsSync(cachePath)) {
+                options.executablePath = findExecutable(cachePath);
+                console.log(`[Puppeteer] Found browser at: ${options.executablePath}`);
+            }
+        } catch (e) {
+            console.error(`[Puppeteer] Error finding browser: ${e.message}`);
+        }
+
+        // Fallback to standard path if search fails
+        if (!options.executablePath) {
+            options.executablePath = '/usr/bin/google-chrome';
+        }
     }
 
     launchPromise = puppeteer.launch(options).then(b => {
