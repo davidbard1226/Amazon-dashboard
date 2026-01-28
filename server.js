@@ -44,7 +44,7 @@ async function getBrowser() {
 
     // If on Render, use a simpler launch
     if (process.env.RENDER) {
-        options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || null;
+        options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome';
     }
 
     launchPromise = puppeteer.launch(options).then(b => {
