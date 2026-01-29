@@ -46,16 +46,23 @@ async function getBrowser() {
     // If on Render or Linux, find the locally installed chrome
     if (process.env.RENDER || process.platform === 'linux') {
         const cachePath = path.join(__dirname, '.cache', 'puppeteer');
+        console.log(`[Puppeteer] RENDER detected. __dirname: ${__dirname}, cachePath: ${cachePath}`);
 
-        // We know the exact version/path from Render logs: 
-        // /opt/render/project/src/.cache/puppeteer/chrome-headless-shell/linux-145.0.7632.26/chrome-headless-shell-linux64/chrome-headless-shell
-        // We'll try to find it first, then search
+        if (!fs.existsSync(cachePath)) {
+            console.log(`[Puppeteer] Cache path does NOT exist: ${cachePath}`);
+        } else {
+            console.log(`[Puppeteer] Cache path exists. Files: ${fs.readdirSync(cachePath).join(', ')}`);
+        }
+
+        // Exact path from logs
         const knownPath = path.join(cachePath, 'chrome-headless-shell', 'linux-145.0.7632.26', 'chrome-headless-shell-linux64', 'chrome-headless-shell');
+        console.log(`[Puppeteer] Checking knownPath: ${knownPath}`);
 
         if (fs.existsSync(knownPath)) {
             options.executablePath = knownPath;
-            console.log(`[Puppeteer] Using known Render path: ${options.executablePath}`);
+            console.log(`[Puppeteer] SUCCESS: Found at knownPath: ${options.executablePath}`);
         } else {
+            console.log(`[Puppeteer] knownPath NOT found. Starting recursive search...`);
             // Recursive search fallback
             const findExecutable = (dir, depth = 0) => {
                 if (depth > 6) return null;
@@ -81,11 +88,17 @@ async function getBrowser() {
         // Final fallback
         if (!options.executablePath) {
             options.executablePath = '/usr/bin/google-chrome';
+            console.warn(`[Puppeteer] ALL local searches failed. Falling back to: ${options.executablePath}`);
         }
 
         // Ensure executable
         if (options.executablePath && fs.existsSync(options.executablePath)) {
-            try { fs.chmodSync(options.executablePath, 0o755); } catch (e) { }
+            try {
+                console.log(`[Puppeteer] Setting execute permissions for: ${options.executablePath}`);
+                fs.chmodSync(options.executablePath, 0o755);
+            } catch (e) {
+                console.error(`[Puppeteer] Chmod failed: ${e.message}`);
+            }
         }
     }
 
