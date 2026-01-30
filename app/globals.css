@@ -1,63 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 213 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 213 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 213 20% 20%;
-    --primary: 33 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 213 32% 17%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 10% 92%;
-    --muted-foreground: 213 10% 45%;
-    --accent: 33 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 10% 85%;
-    --input: 214 10% 85%;
-    --ring: 33 100% 50%;
-    --radius: 0.5rem;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-  }
-
-  .dark {
-    --background: 213 32% 12%;
-    --foreground: 0 0% 95%;
-    --card: 213 32% 17%;
-    --card-foreground: 0 0% 95%;
-    --popover: 213 32% 17%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 33 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 213 20% 25%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 213 20% 25%;
-    --muted-foreground: 213 10% 65%;
-    --accent: 33 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 213 20% 25%;
-    --input: 213 20% 25%;
-    --ring: 33 100% 50%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-  }
+@theme inline {
+  --font-sans: "Inter", "Inter Fallback", system-ui, sans-serif;
+  
+  --color-background: hsl(0 0% 98%);
+  --color-foreground: hsl(213 20% 20%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(213 20% 20%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(213 20% 20%);
+  --color-primary: hsl(33 100% 50%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(213 32% 17%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(210 10% 92%);
+  --color-muted-foreground: hsl(213 10% 45%);
+  --color-accent: hsl(33 100% 50%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-destructive: hsl(0 72% 51%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(214 10% 85%);
+  --color-input: hsl(214 10% 85%);
+  --color-ring: hsl(33 100% 50%);
+  --color-success: hsl(142 76% 36%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --radius: 0.5rem;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
