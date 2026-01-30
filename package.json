@@ -1,15 +1,25 @@
 {
-  "name": "amazon-dashboard-proxy",
-  "version": "2.0.0",
-  "description": "Local proxy server with Puppeteer for Amazon Dashboard",
-  "main": "server.js",
+  "name": "amazon-buybox-dashboard",
+  "version": "5.0.0",
+  "description": "Amazon Buy Box Dashboard for tracking prices and sellers",
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "node-fetch": "^2.7.0",
-    "puppeteer-core": "^21.11.0"
+    "next": "^16.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.3",
+    "puppeteer-core": "^24.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4"
   }
 }
