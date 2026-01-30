@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 const app = express();
@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.static(__dirname));
 
-// Memory-safe concurrency queue for Render
+// Memory-safe concurrency queue
 let requestQueue = Promise.resolve();
 let browser = null;
 let launchPromise = null;
@@ -24,80 +24,47 @@ async function getBrowser() {
     }
 
     console.log('[Puppeteer] Launching browser...');
+    
     const options = {
-        headless: "new",
+        headless: true,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
-            '--no-zygote',
             '--disable-gpu',
-            '--single-process',
             '--disable-canvas-aa',
             '--disable-2d-canvas-clip-aa',
             '--disable-gl-drawing-for-tests',
             '--hide-scrollbars',
-            '--disable-notifications'
+            '--disable-notifications',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process'
         ]
     };
 
-    // If on Render or Linux, find the locally installed chrome
-    if (process.env.RENDER || process.platform === 'linux') {
-        const cachePath = path.join(__dirname, '.cache', 'puppeteer');
-        console.log(`[Puppeteer] RENDER detected. __dirname: ${__dirname}, cachePath: ${cachePath}`);
+    // Railway/Cloud-specific optimizations
+    if (process.env.RAILWAY_ENVIRONMENT || process.platform === 'linux') {
+        console.log('[Puppeteer] Cloud environment detected');
+        options.args.push(
+            '--single-process',
+            '--no-zygote'
+        );
+    }
 
-        if (!fs.existsSync(cachePath)) {
-            console.log(`[Puppeteer] Cache path does NOT exist: ${cachePath}`);
-        } else {
-            console.log(`[Puppeteer] Cache path exists. Files: ${fs.readdirSync(cachePath).join(', ')}`);
-        }
-
-        // Exact path from logs
-        const knownPath = path.join(cachePath, 'chrome-headless-shell', 'linux-145.0.7632.26', 'chrome-headless-shell-linux64', 'chrome-headless-shell');
-        console.log(`[Puppeteer] Checking knownPath: ${knownPath}`);
-
-        if (fs.existsSync(knownPath)) {
-            options.executablePath = knownPath;
-            console.log(`[Puppeteer] SUCCESS: Found at knownPath: ${options.executablePath}`);
-        } else {
-            console.log(`[Puppeteer] knownPath NOT found. Starting recursive search...`);
-            // Recursive search fallback
-            const findExecutable = (dir, depth = 0) => {
-                if (depth > 6) return null;
-                if (!fs.existsSync(dir)) return null;
-                const files = fs.readdirSync(dir);
-                for (const file of files) {
-                    const fullPath = path.join(dir, file);
-                    try {
-                        const stat = fs.statSync(fullPath);
-                        if (stat.isDirectory()) {
-                            const found = findExecutable(fullPath, depth + 1);
-                            if (found) return found;
-                        } else if (file === 'chrome' || file === 'chromium' || file === 'google-chrome' || file === 'chrome-headless-shell') {
-                            return fullPath;
-                        }
-                    } catch (e) { }
-                }
-                return null;
-            };
-            options.executablePath = findExecutable(cachePath);
-        }
-
-        // Final fallback
-        if (!options.executablePath) {
-            options.executablePath = '/usr/bin/google-chrome';
-            console.warn(`[Puppeteer] ALL local searches failed. Falling back to: ${options.executablePath}`);
-        }
-
-        // Ensure executable
-        if (options.executablePath && fs.existsSync(options.executablePath)) {
-            try {
-                console.log(`[Puppeteer] Setting execute permissions for: ${options.executablePath}`);
-                fs.chmodSync(options.executablePath, 0o755);
-            } catch (e) {
-                console.error(`[Puppeteer] Chmod failed: ${e.message}`);
+    // Windows-specific: Try to find local Chrome
+    if (process.platform === 'win32' && !process.env.RAILWAY_ENVIRONMENT) {
+        const paths = [
+            'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+            'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
+        ];
+        for (const p of paths) {
+            if (fs.existsSync(p)) {
+                options.executablePath = p;
+                console.log(`[Puppeteer] Local Windows: Found browser at ${p}`);
+                break;
             }
         }
     }
@@ -105,6 +72,12 @@ async function getBrowser() {
     launchPromise = puppeteer.launch(options).then(b => {
         browser = b;
         launchPromise = null;
+
+        browser.on('disconnected', () => {
+            console.log('[Puppeteer] Browser disconnected.');
+            browser = null;
+        });
+
         console.log('[Puppeteer] Browser ready.');
         return browser;
     }).catch(err => {
@@ -168,6 +141,7 @@ app.get('/proxy', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Amazon Dashboard Server running at port ${PORT}`);
+    console.log(`Environment: ${process.env.RAILWAY_ENVIRONMENT ? 'Railway' : 'Local'}`);
 });
 
 // Graceful Shutdown

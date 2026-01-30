@@ -10,273 +10,325 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
+    :root {
+      --primary: #FF9900;
+      --bg: #0f111a;
+      --card-bg: rgba(30, 33, 45, 0.7);
+      --text: #e0e0e0;
+      --border: rgba(255, 255, 255, 0.1);
+      --win: #4ade80;
+      --lose: #f87171;
+      --amazon: #232F3E;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       margin: 0;
-      background: #f8f9fa;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
     }
 
     .header {
-      background: #232F3E;
+      background: var(--amazon);
       color: white;
-      padding: 15px;
+      padding: 20px;
       text-align: center;
-      font-size: 24px;
+      font-size: 26px;
+      font-weight: 800;
       position: relative;
+      border-bottom: 2px solid var(--primary);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .server-status {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 14px;
-      padding: 5px 10px;
-      border-radius: 4px;
-      background: #444;
+      top: 22px;
+      right: 20px;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
     }
 
     .status-ok {
-      color: #00ff00;
+      color: var(--win);
+      text-shadow: 0 0 10px var(--win);
     }
 
     .status-err {
-      color: #ff3333;
-    }
-
-    .debug-log {
-      background: #1e1e1e;
-      color: #00ff00;
-      font-family: monospace;
-      padding: 10px;
-      font-size: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 20px;
-      border-radius: 6px;
-      display: none;
+      color: var(--lose);
+      text-shadow: 0 0 10px var(--lose);
     }
 
     .tabs {
       display: flex;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-      overflow-x: auto;
+      background: #161922;
+      padding: 10px 20px 0;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .tab {
-      padding: 15px 25px;
+      padding: 12px 24px;
       cursor: pointer;
-      background: #eee;
-      margin-right: 5px;
-      border-radius: 8px 8px 0 0;
-      font-weight: bold;
+      background: transparent;
+      color: #888;
+      border-radius: 12px 12px 0 0;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      border-bottom: none;
+    }
+
+    .tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .tab.active {
-      background: #FF9900;
-      color: white;
+      background: var(--card-bg);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      border-bottom: 2px solid var(--primary);
     }
 
     .container {
-      padding: 20px;
-      max-width: 1400px;
+      padding: 30px;
+      max-width: 1500px;
       margin: auto;
       display: none;
+      animation: fadeIn 0.4s ease-out;
     }
 
-    #home {
-      display: block;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    textarea {
-      width: 100%;
-      height: 100px;
+    textarea,
+    input,
+    select {
+      background: #1e212d;
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
     }
 
     button {
-      padding: 12px 24px;
-      background: #FF9900;
-      color: white;
+      padding: 12px 28px;
+      background: var(--primary);
+      color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      margin: 5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
     }
 
     button:hover {
       background: #e68a00;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
     }
 
     button.danger {
-      background: #d32f2f;
+      background: #ef4444;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
 
     button.small {
-      padding: 6px 12px;
-      font-size: 14px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    th,
-    td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    th {
-      background: #232F3E;
-      color: white;
-      cursor: pointer;
-      position: sticky;
-      top: 0;
-    }
-
-    tr:hover {
-      background: #f5f5f5;
-    }
-
-    .search {
-      width: 100%;
-      max-width: 500px;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-    }
-
-    .progress-container {
-      width: 100%;
-      background: #ddd;
-      border-radius: 10px;
-      margin: 10px 0;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 24px;
-      background: #FF9900;
-      width: 0%;
-      transition: width 0.3s;
-      text-align: center;
-      color: white;
-      line-height: 24px;
-      font-weight: bold;
+      padding: 8px 16px;
+      font-size: 13px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
     }
 
     .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
       position: relative;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card.win-card {
+      border-left: 5px solid var(--win);
+    }
+
+    .card.lose-card {
+      border-left: 5px solid var(--lose);
     }
 
     .price {
-      font-size: 28px;
-      font-weight: bold;
-      color: #B12704;
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      margin: 10px 0;
     }
 
-    .win {
-      color: green;
+    .distance-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: bold;
+      margin-left: 10px;
     }
 
-    .lose {
-      color: red;
-      font-weight: bold;
+    .distance-good {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--win);
+    }
+
+    .distance-bad {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--lose);
     }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
     }
 
     .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      background: linear-gradient(135deg, #1e212d 0%, #161922 100%);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
       text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: scale(1.02);
     }
 
     .stat-card h3 {
-      margin: 0 0 8px;
-      font-size: 32px;
-      color: #FF9900;
+      margin: 0 0 10px;
+      font-size: 38px;
+      color: var(--primary);
+      text-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
     }
 
-    .diff-win {
-      color: green;
-      font-weight: bold;
-    }
-
-    .diff-lose {
-      color: red;
-      font-weight: bold;
-    }
-
-    .sku-badge {
-      background: #eee;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
+    .stat-card p {
+      margin: 0;
+      color: #aaa;
+      text-transform: uppercase;
       font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
     }
 
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
       margin-top: 20px;
-      gap: 10px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
 
-    .page-info {
-      font-size: 14px;
-      color: #555;
+    th {
+      background: #161922;
+      color: #888;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 16px;
     }
 
-    .filter-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .live-indicator {
+      display: inline-flex;
       align-items: center;
-      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      margin-left: 15px;
     }
 
-    .filter-group select,
-    .filter-group input {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
+    .live-indicator.active {
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--win);
     }
 
-    .product-count {
-      font-weight: bold;
-      margin-bottom: 10px;
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: currentColor;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: scale(0.95);
+        opacity: 0.9;
+      }
     }
   </style>
 </head>
@@ -334,7 +386,12 @@
       <textarea id="asinInput" placeholder="B01ARGZO2K..."></textarea><br>
       <button onclick="addAndRefresh()">Add & Refresh New</button>
       <button onclick="refreshAll()">Refresh All</button>
+      <button id="liveModeBtn" onclick="toggleLiveMode()">Start Live Mode (Auto)</button>
       <button onclick="exportHistory()">Export History CSV</button>
+      <div id="liveStatus" class="live-indicator">
+        <div class="pulse"></div>
+        <span>LIVE MODE: <span id="liveState">OFF</span></span>
+      </div>
     </div>
     <div class="progress-container" id="progressContainer" style="display:none;">
       <div class="progress-bar" id="progressBar">0%</div>
@@ -550,7 +607,10 @@
             const sLink = Array.from(b.querySelectorAll('a[href*="seller="], a[aria-label*="sold by"], a[aria-label*="Opens a new page"], #aod-offer-soldBy a'))
               .find(el => {
                 const t = el.textContent.trim();
-                return t && t !== "Details" && t !== "Return details" && !t.includes("delivery costs");
+                const aria = (el.getAttribute('aria-label') || "").toLowerCase();
+                const isGeneric = t === "Details" || t === "Return details" || t === "Details about delivery" || t.length < 2;
+                const isNav = t.includes("delivery") || t.includes("Learn more") || aria.includes("delivery costs") || aria.includes("methods");
+                return t && !isGeneric && !isNav;
               });
 
             const potentialSeller = sLink ? sLink.textContent.trim() : "";
@@ -559,7 +619,8 @@
               seller = potentialSeller;
             } else {
               const text = b.innerText || b.textContent || "";
-              const m = text.match(/Sold by\s+([^.\n|,\r\t]+)/i);
+              // Better regex for "Sold by" that stops at specific symbols or newlines
+              const m = text.match(/Sold by[:\s]+([^.\n|,\r\t<>]{2,50})/i);
               if (m && m[1].trim().length > 1) {
                 seller = m[1].trim();
               } else if (text.includes("Sold by Amazon") || text.includes("Ships from Amazon")) {
@@ -607,26 +668,58 @@
     }
 
     function renderCards() {
-      const container = document.getElementById('cards'); container.innerHTML = '';
+      const container = document.getElementById('cards');
+      container.innerHTML = '';
       let weWin = 0, totalCount = Object.keys(allProducts).length;
+
       Object.keys(allProducts).forEach(asin => {
         const prod = allProducts[asin];
         const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : { raw: "N/A", seller: "N/A", price: 0 });
         const isBonolo = last.seller.toLowerCase().includes('bonolo');
         if (isBonolo) weWin++;
 
-        const diff = prod.myPrice ? (last.price - prod.myPrice) : null;
+        const priceGap = (prod.myPrice && last.price) ? (prod.myPrice - last.price).toFixed(2) : null;
+        const winClass = isBonolo ? 'win-card' : 'lose-card';
 
-        const card = document.createElement('div'); card.className = 'card';
+        const card = document.createElement('div');
+        card.className = `card ${winClass}`;
         card.innerHTML = `
-          <h3>${prod.title.substring(0, 60)}...</h3>
-          <p><span class="sku-badge">SKU: ${prod.sku || "N/A"}</span> | <span class="${prod.stock < 5 ? 'stock-low' : ''}">Stock: ${prod.stock || 0}</span></p>
-          <div class="price">${last.raw}</div>
-          <p>Buy Box: <span class="${isBonolo ? 'win' : 'lose'}">${last.seller}</span></p>
-          <p>My Price: R ${prod.myPrice || 0} ${diff !== null ? `<span class="${diff >= 0 ? 'win' : 'lose'}">(${diff >= 0 ? '+' : ''}${diff.toFixed(2)})</span>` : ''}</p>
-          <button class="small" onclick="scrapeASIN('${asin}').then(renderAll)">Refresh</button>
-          <button class="danger small" onclick="deleteProduct('${asin}')">Delete</button>
-          <canvas id="chart_${asin}"></canvas>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 style="margin:0; font-size:16px; color:#fff;">${prod.title.substring(0, 50)}...</h3>
+            <span class="sku-badge">${prod.sku || "NO SKU"}</span>
+          </div>
+          
+          <div class="price">
+            ${last.raw}
+            ${priceGap !== null && !isBonolo ?
+            `<span class="distance-badge distance-bad">R${priceGap} to reach</span>` :
+            (isBonolo ? `<span class="distance-badge distance-good">YOU WIN</span>` : '')}
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; margin:15px 0; color:#888;">
+            <div>
+              <div style="margin-bottom:4px;">BUY BOX SELLER</div>
+              <strong style="color:${isBonolo ? 'var(--win)' : 'var(--lose)'}">${last.seller}</strong>
+            </div>
+            <div>
+              <div style="margin-bottom:4px;">YOUR PRICE</div>
+              <strong style="color:#fff;">R ${prod.myPrice || 0}</strong>
+            </div>
+            <div>
+              <div style="margin-bottom:4px;">STOCK LEVEL</div>
+              <strong style="${prod.stock < 10 ? 'color:var(--lose)' : 'color:#fff'}">${prod.stock || 0} units</strong>
+            </div>
+            <div>
+              <div style="margin-bottom:4px;">LAST UPDATE</div>
+              <span style="font-size:11px;">${last.date ? new Date(last.date).toLocaleTimeString() : 'Never'}</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="small" style="flex:1" onclick="scrapeASIN('${asin}').then(renderAll)">Refresh Now</button>
+            <button class="danger small" onclick="deleteProduct('${asin}')">×</button>
+          </div>
+          <canvas id="chart_${asin}" style="margin-top:15px; max-height:80px;"></canvas>
         `;
         container.appendChild(card);
 
@@ -896,13 +989,49 @@
       }
     }
 
+    let liveModeTimer = null;
+    let liveModeIndex = 0;
+
+    function toggleLiveMode() {
+      const btn = document.getElementById('liveModeBtn');
+      const state = document.getElementById('liveState');
+      const statusDiv = document.getElementById('liveStatus');
+
+      if (liveModeTimer) {
+        clearInterval(liveModeTimer);
+        liveModeTimer = null;
+        btn.textContent = 'Start Live Mode (Auto)';
+        state.textContent = 'OFF';
+        statusDiv.classList.remove('active');
+        logDebug("Live Mode Stopped.");
+      } else {
+        const asins = Object.keys(allProducts);
+        if (!asins.length) return alert("Add some products first!");
+        btn.textContent = 'Stop Live Mode';
+        state.textContent = 'ON';
+        statusDiv.classList.add('active');
+        logDebug("Live Mode Started: Cycling 1 product/min.");
+        runLiveCycle();
+        liveModeTimer = setInterval(runLiveCycle, 60000);
+      }
+    }
+
+    async function runLiveCycle() {
+      const asins = Object.keys(allProducts);
+      if (!asins.length) return;
+      if (liveModeIndex >= asins.length) liveModeIndex = 0;
+      const targetAsin = asins[liveModeIndex];
+      logDebug(`Live Cycle: Updating ${targetAsin}...`);
+      await scrapeASIN(targetAsin);
+      renderAll();
+      liveModeIndex++;
+    }
+
     function toggleSelectAll(el) { document.querySelectorAll('#productsTable .row-check').forEach(cb => cb.checked = el.checked); }
     function renderAll() {
       try {
-        addBootLog("Building UI...");
         renderCards(); updateSellerFilter(); renderTable(); renderAnalysis();
-        addBootLog("UI Successful.");
-      } catch (e) { addBootLog(`UI ERROR: ${e.message}`, true); }
+      } catch (e) { logDebug(`UI ERROR: ${e.message}`, true); }
     }
     function deleteProduct(asin) { if (confirm('Delete ' + asin + '?')) { delete allProducts[asin]; save(); renderAll(); } }
 
