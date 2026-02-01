@@ -3,277 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon Buybox Dashboard - Enhanced</title>
+    <title>Amazon Buybox Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
+        
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-
+        
         header {
             background: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-
+        
         h1 {
             color: #333;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .stats-grid {
+        
+        .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 20px;
         }
-
+        
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
         }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            margin-top: 10px;
+        
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
         }
-
-        .input-area {
+        
+        .stat-card p {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .controls {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
-
-        .input-row {
+        
+        .input-group {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
-
-        input[type="text"], input[type="number"] {
+        
+        input {
             flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
+            min-width: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
+        
         button {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            background: #667eea;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
         }
-
+        
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #5568d3;
         }
-
-        button:active {
-            transform: translateY(0);
-        }
-
+        
         button.danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #dc3545;
         }
-
-        button.success {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        
+        button.danger:hover {
+            background: #c82333;
         }
-
-        button.warning {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .search-bar {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        .search-bar:focus {
-            outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-        }
-
+        
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 20px;
         }
-
+        
         .product-card {
             background: white;
-            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-
-        .product-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .status-winning {
-            background: #4ade80;
-            color: white;
-        }
-
-        .status-losing {
-            background: #f87171;
-            color: white;
-        }
-
-        .product-title {
-            font-size: 16px;
-            font-weight: bold;
+        
+        .product-card h3 {
             color: #333;
-            margin-bottom: 15px;
-            padding-right: 80px;
-            line-height: 1.4;
-        }
-
-        .product-info {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-size: 14px;
         }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .info-label {
-            color: #666;
-            font-weight: 600;
-        }
-
-        .info-value {
-            color: #333;
-            font-weight: bold;
-        }
-
-        .urgent-alert {
-            background: linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%);
-            color: white;
-            padding: 12px;
+        
+        .product-info {
             margin: 10px 0;
-            border-radius: 8px;
-            font-weight: bold;
-            text-align: center;
-            animation: pulse 2s infinite;
+            font-size: 13px;
         }
-
-        .medium-alert {
-            background: linear-gradient(135deg, #ff9900 0%, #ffb347 100%);
+        
+        .product-info strong {
+            display: inline-block;
+            width: 100px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status-winning {
+            background: #28a745;
             color: white;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 6px;
-            font-weight: bold;
-            text-align: center;
         }
-
-        .low-stock-alert {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        
+        .status-losing {
+            background: #dc3545;
             color: white;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 6px;
-            font-weight: bold;
-            text-align: center;
         }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.9; transform: scale(1.02); }
-        }
-
+        
         .product-actions {
+            margin-top: 15px;
             display: flex;
             gap: 10px;
-            margin-top: 15px;
         }
-
-        .btn-small {
+        
+        .product-actions button {
             flex: 1;
-            padding: 8px 12px;
+            padding: 8px;
             font-size: 12px;
         }
-
-        .progress-container {
+        
+        .progress {
             width: 100%;
-            background: #f0f0f0;
-            border-radius: 10px;
             height: 30px;
-            margin: 20px 0;
+            background: #f0f0f0;
+            border-radius: 5px;
             overflow: hidden;
+            margin: 10px 0;
             display: none;
         }
-
+        
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #4ade80, #22c55e);
+            background: #28a745;
             width: 0%;
             transition: width 0.3s;
             display: flex;
@@ -282,328 +182,134 @@
             color: white;
             font-weight: bold;
         }
-
-        .tab-container {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px 20px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s;
-            border-radius: 0;
-        }
-
-        .tab.active {
-            background: white;
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .tab-content {
-            padding: 20px;
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .competitor-widget {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .competitor-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9fa;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .competitor-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .competitor-count {
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .input-row {
-                flex-direction: column;
-            }
-
-            input[type="text"], input[type="number"] {
-                min-width: 100%;
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .view-product-btn {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            padding: 8px 15px;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-
-        .view-product-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 3px 10px rgba(34, 197, 94, 0.4);
-        }
-
-        .recovery-banner {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="recoveryBanner" class="recovery-banner hidden">
-            ✅ Data recovered! Found <span id="recoveredCount">0</span> products from previous version.
-        </div>
-
         <header>
-            <h1>
-                📊 Amazon Buybox Dashboard
-                <span style="font-size: 0.4em; color: #667eea;">ENHANCED</span>
-            </h1>
-            
-            <div class="stats-grid">
+            <h1>📊 Amazon Buybox Dashboard</h1>
+            <div class="stats">
                 <div class="stat-card">
-                    <div>Total Products</div>
-                    <div class="stat-value" id="totalProducts">0</div>
+                    <h3>Total Products</h3>
+                    <p id="totalProducts">0</p>
                 </div>
                 <div class="stat-card">
-                    <div>🏆 Winning</div>
-                    <div class="stat-value" id="winningCount">0</div>
+                    <h3>Winning</h3>
+                    <p id="winningCount">0</p>
                 </div>
                 <div class="stat-card">
-                    <div>⚠️ Losing</div>
-                    <div class="stat-value" id="losingCount">0</div>
+                    <h3>Losing</h3>
+                    <p id="losingCount">0</p>
                 </div>
                 <div class="stat-card">
-                    <div>Win Rate</div>
-                    <div class="stat-value" id="winRate">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div>🔥 Easy Wins</div>
-                    <div class="stat-value" id="easyWins">0</div>
+                    <h3>Win Rate</h3>
+                    <p id="winRate">0%</p>
                 </div>
             </div>
         </header>
 
-        <div class="input-area">
-            <div class="input-row">
-                <input type="text" id="asinInput" placeholder="Enter ASIN (e.g., B08N5WRWNW)">
-                <input type="text" id="titleInput" placeholder="Product Title (optional)">
-                <input type="text" id="skuInput" placeholder="Your SKU (optional)">
-                <input type="number" id="myPriceInput" placeholder="Your Price (R)" step="0.01">
-                <input type="number" id="stockInput" placeholder="Stock Qty (optional)">
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="asinInput" placeholder="ASIN (e.g., B08N5WRWNW)">
+                <input type="text" id="titleInput" placeholder="Title (optional)">
+                <input type="text" id="skuInput" placeholder="SKU (optional)">
+                <input type="number" id="myPriceInput" placeholder="Your Price" step="0.01">
+                <input type="number" id="stockInput" placeholder="Stock (optional)">
             </div>
-            <div class="input-row">
-                <button onclick="addProduct()" class="success">➕ Add Product</button>
-                <button onclick="refreshAll()" class="warning">🔄 Refresh All</button>
-                <button onclick="smartRefreshLosers()" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);">⚡ Smart Refresh (Losers Only)</button>
-                <button onclick="exportPriceAdjustments()" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">💰 Export Price Suggestions</button>
+            <div class="input-group">
+                <button onclick="addProduct()">➕ Add Product</button>
+                <button onclick="refreshAll()">🔄 Refresh All</button>
                 <button onclick="clearAll()" class="danger">🗑️ Clear All</button>
             </div>
-            
-            <div class="progress-container" id="progressContainer">
+            <div class="progress" id="progressContainer">
                 <div class="progress-bar" id="progressBar">0%</div>
             </div>
         </div>
 
-        <div class="competitor-widget" id="competitorWidget">
-            <h3 style="margin-bottom: 15px; color: #333;">🎯 Top Competitors</h3>
-            <div id="competitorList"></div>
-        </div>
-
-        <div class="tab-container">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab" onclick="switchTab('table')">📋 Product Table</button>
-                <button class="tab" onclick="switchTab('insights')">💡 Insights</button>
-            </div>
-
-            <div id="dashboardTab" class="tab-content active">
-                <input type="text" id="searchBar" class="search-bar" placeholder="🔍 Search products by ASIN, title, or seller..." oninput="filterProducts()">
-                <div class="products-grid" id="productsGrid"></div>
-            </div>
-
-            <div id="tableTab" class="tab-content">
-                <input type="text" id="searchBarTable" class="search-bar" placeholder="🔍 Search products..." oninput="filterTable()">
-                <table id="productsTable">
-                    <thead>
-                        <tr>
-                            <th>ASIN</th>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Current Seller</th>
-                            <th>Price</th>
-                            <th>Your Price</th>
-                            <th>Gap</th>
-                            <th>Stock</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <div id="insightsTab" class="tab-content">
-                <h3 style="margin-bottom: 20px;">📈 Price Adjustment Recommendations</h3>
-                <div id="priceRecommendations"></div>
-                
-                <h3 style="margin: 30px 0 20px;">⚠️ Low Stock Alerts</h3>
-                <div id="lowStockAlerts"></div>
-            </div>
-        </div>
+        <div class="products-grid" id="productsGrid"></div>
     </div>
 
     <script>
         const API_BASE = window.location.origin;
         
-        // DATA RECOVERY: Check ALL possible localStorage keys
-        function recoverData() {
-            const possibleKeys = [
-                'amazonProducts',      // New key
-                'products',            // Possible old key
-                'buyboxProducts',      // Possible old key
-                'scrapedProducts'      // Possible old key
-            ];
-            
-            let recovered = null;
-            let recoveredFrom = null;
-            
-            for (const key of possibleKeys) {
+        // Try to load from ANY localStorage key
+        function loadProducts() {
+            const keys = ['amazonProducts', 'products', 'buyboxProducts', 'scrapedProducts'];
+            for (const key of keys) {
                 const data = localStorage.getItem(key);
                 if (data) {
                     try {
                         const parsed = JSON.parse(data);
                         if (Object.keys(parsed).length > 0) {
-                            recovered = parsed;
-                            recoveredFrom = key;
-                            console.log(`✅ Found ${Object.keys(parsed).length} products in localStorage key: ${key}`);
-                            break;
+                            console.log(`✅ Loaded ${Object.keys(parsed).length} products from: ${key}`);
+                            return parsed;
                         }
                     } catch (e) {
-                        console.log(`❌ Failed to parse localStorage key: ${key}`);
+                        console.error(`Failed to parse ${key}:`, e);
                     }
                 }
             }
-            
-            if (recovered && recoveredFrom !== 'amazonProducts') {
-                // Migrate to new key
-                localStorage.setItem('amazonProducts', JSON.stringify(recovered));
-                document.getElementById('recoveredCount').textContent = Object.keys(recovered).length;
-                document.getElementById('recoveryBanner').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('recoveryBanner').classList.add('hidden');
-                }, 5000);
-            }
-            
-            return recovered || {};
+            return {};
         }
         
-        let allProducts = recoverData();
+        let allProducts = loadProducts();
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            renderAll();
-            updateCompetitors();
-            updateInsights();
-        });
+        // Save to default key
+        function saveProducts() {
+            localStorage.setItem('amazonProducts', JSON.stringify(allProducts));
+        }
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            if (tabName === 'dashboard') {
-                document.getElementById('dashboardTab').classList.add('active');
-                document.querySelector('.tab:nth-child(1)').classList.add('active');
-            } else if (tabName === 'table') {
-                document.getElementById('tableTab').classList.add('active');
-                document.querySelector('.tab:nth-child(2)').classList.add('active');
-                renderTable();
-            } else if (tabName === 'insights') {
-                document.getElementById('insightsTab').classList.add('active');
-                document.querySelector('.tab:nth-child(3)').classList.add('active');
-                updateInsights();
+        function renderAll() {
+            // Update stats
+            const total = Object.keys(allProducts).length;
+            let winning = 0;
+            let losing = 0;
+
+            Object.values(allProducts).forEach(prod => {
+                const last = prod.last || (prod.points && prod.points.length ? prod.points[prod.points.length - 1] : null);
+                if (!last) return;
+                
+                const isBonolo = last.seller && last.seller.toLowerCase().includes('bonolo');
+                if (isBonolo) winning++;
+                else losing++;
+            });
+
+            document.getElementById('totalProducts').textContent = total;
+            document.getElementById('winningCount').textContent = winning;
+            document.getElementById('losingCount').textContent = losing;
+            document.getElementById('winRate').textContent = total > 0 ? ((winning / total * 100).toFixed(1) + '%') : '0%';
+
+            // Render product cards
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            Object.entries(allProducts).forEach(([asin, prod]) => {
+                const last = prod.last || (prod.points && prod.points.length ? prod.points[prod.points.length - 1] : null);
+                const isBonolo = last && last.seller && last.seller.toLowerCase().includes('bonolo');
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${prod.title || 'Loading...'}</h3>
+                    <div class="product-info"><strong>ASIN:</strong> ${asin}</div>
+                    ${prod.sku ? `<div class="product-info"><strong>SKU:</strong> ${prod.sku}</div>` : ''}
+                    <div class="product-info"><strong>Seller:</strong> ${last ? last.seller : 'N/A'}</div>
+                    <div class="product-info"><strong>Price:</strong> R${last && last.price ? last.price.toFixed(2) : 'N/A'}</div>
+                    ${prod.myPrice ? `<div class="product-info"><strong>Your Price:</strong> R${prod.myPrice.toFixed(2)}</div>` : ''}
+                    ${prod.stock !== null && prod.stock !== undefined ? `<div class="product-info"><strong>Stock:</strong> ${prod.stock}</div>` : ''}
+                    <span class="status-badge ${isBonolo ? 'status-winning' : 'status-losing'}">
+                        ${isBonolo ? '🏆 WINNING' : '⚠️ LOSING'}
+                    </span>
+                    <div class="product-actions">
+                        <button onclick="scrapeASIN('${asin}')">🔄 Refresh</button>
+                        <button onclick="deleteProduct('${asin}')" class="danger">Delete</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            if (grid.children.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No products yet. Add one above!</p>';
             }
         }
 
@@ -611,7 +317,7 @@
             const asin = document.getElementById('asinInput').value.trim();
             if (!asin) return alert('Please enter an ASIN');
 
-            const product = {
+            allProducts[asin] = {
                 asin: asin,
                 title: document.getElementById('titleInput').value.trim() || 'Loading...',
                 sku: document.getElementById('skuInput').value.trim() || '',
@@ -621,10 +327,10 @@
                 last: null
             };
 
-            allProducts[asin] = product;
             saveProducts();
             renderAll();
 
+            // Clear inputs
             document.getElementById('asinInput').value = '';
             document.getElementById('titleInput').value = '';
             document.getElementById('skuInput').value = '';
@@ -648,11 +354,13 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     
+                    // Extract title
                     const titleEl = doc.querySelector('#productTitle, h1.a-size-large');
                     if (titleEl && allProducts[asin].title === 'Loading...') {
                         allProducts[asin].title = titleEl.textContent.trim();
                     }
 
+                    // Extract seller
                     let seller = 'N/A';
                     const sellerEl = doc.querySelector('#merchant-info, #sellerProfileTriggerId, .tabular-buybox-text');
                     if (sellerEl) {
@@ -665,6 +373,7 @@
                         }
                     }
 
+                    // Extract price
                     let price = null;
                     const priceEl = doc.querySelector('.a-price .a-offscreen, #priceblock_ourprice, .a-price-whole');
                     if (priceEl) {
@@ -672,6 +381,7 @@
                         price = parseFloat(priceText.replace(',', ''));
                     }
 
+                    // Save data
                     const dataPoint = {
                         timestamp: new Date().toISOString(),
                         seller: seller,
@@ -679,6 +389,7 @@
                         url: url
                     };
 
+                    if (!allProducts[asin].points) allProducts[asin].points = [];
                     allProducts[asin].points.push(dataPoint);
                     allProducts[asin].last = dataPoint;
                     
@@ -689,8 +400,6 @@
 
             saveProducts();
             renderAll();
-            updateCompetitors();
-            updateInsights();
         }
 
         async function refreshAll() {
@@ -712,392 +421,22 @@
             alert(`✅ Refreshed all ${asins.length} products!`);
         }
 
-        async function smartRefreshLosers() {
-            const losers = Object.keys(allProducts).filter(asin => {
-                const prod = allProducts[asin];
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                return last && !last.seller.toLowerCase().includes('bonolo');
-            });
-
-            if (losers.length === 0) {
-                alert("🎉 You're winning all buyboxes! Nothing to refresh.");
-                return;
-            }
-
-            console.log(`🎯 Smart Refresh: Only updating ${losers.length} products you're losing`);
-            
-            document.getElementById('progressContainer').style.display = 'block';
-            
-            for (let i = 0; i < losers.length; i++) {
-                await scrapeASIN(losers[i]);
-                const pct = Math.round(((i + 1) / losers.length * 100));
-                document.getElementById('progressBar').style.width = pct + '%';
-                document.getElementById('progressBar').textContent = pct + '%';
-                await new Promise(r => setTimeout(r, 500));
-            }
-
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('progressBar').style.width = '0%';
-            
-            renderAll();
-            alert(`✅ Smart refresh complete! Updated ${losers.length} losing products.`);
-        }
-
-        function clearAll() {
-            if (!confirm('Are you sure you want to delete all products?')) return;
-            allProducts = {};
-            localStorage.removeItem('amazonProducts');
-            renderAll();
-            updateCompetitors();
-            updateInsights();
-        }
-
         function deleteProduct(asin) {
             if (!confirm(`Delete product ${asin}?`)) return;
             delete allProducts[asin];
             saveProducts();
             renderAll();
-            updateCompetitors();
-            updateInsights();
         }
 
-        function saveProducts() {
-            localStorage.setItem('amazonProducts', JSON.stringify(allProducts));
+        function clearAll() {
+            if (!confirm('Delete all products?')) return;
+            allProducts = {};
+            localStorage.removeItem('amazonProducts');
+            renderAll();
         }
 
-        function renderAll() {
-            renderStats();
-            renderCards();
-            updateCompetitors();
-        }
-
-        function renderStats() {
-            const total = Object.keys(allProducts).length;
-            let winning = 0;
-            let losing = 0;
-            let easyWins = 0;
-
-            Object.values(allProducts).forEach(prod => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                if (!last) return;
-
-                const isBonolo = last.seller.toLowerCase().includes('bonolo');
-                if (isBonolo) {
-                    winning++;
-                } else {
-                    losing++;
-                    
-                    if (prod.myPrice && last.price) {
-                        const gap = prod.myPrice - last.price;
-                        if (gap > 0 && gap < 10) {
-                            easyWins++;
-                        }
-                    }
-                }
-            });
-
-            document.getElementById('totalProducts').textContent = total;
-            document.getElementById('winningCount').textContent = winning;
-            document.getElementById('losingCount').textContent = losing;
-            document.getElementById('winRate').textContent = total > 0 ? ((winning / total * 100).toFixed(1) + '%') : '0%';
-            document.getElementById('easyWins').textContent = easyWins;
-        }
-
-        function renderCards() {
-            const grid = document.getElementById('productsGrid');
-            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
-            
-            grid.innerHTML = '';
-
-            Object.entries(allProducts).forEach(([asin, prod]) => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                
-                const matchesSearch = !searchTerm || 
-                    asin.toLowerCase().includes(searchTerm) ||
-                    prod.title.toLowerCase().includes(searchTerm) ||
-                    (last && last.seller.toLowerCase().includes(searchTerm));
-                
-                if (!matchesSearch) return;
-
-                const isBonolo = last && last.seller.toLowerCase().includes('bonolo');
-                const priceGap = (prod.myPrice && last && last.price) ? (prod.myPrice - last.price).toFixed(2) : null;
-                
-                let alertHtml = '';
-                
-                if (!isBonolo && priceGap !== null) {
-                    const gap = parseFloat(priceGap);
-                    if (gap > 0 && gap < 5) {
-                        alertHtml = `<div class="urgent-alert">🔥 CLOSE! Lower by R${Math.abs(gap).toFixed(2)} to win!</div>`;
-                    } else if (gap > 0 && gap < 20) {
-                        alertHtml = `<div class="medium-alert">⚠️ Medium gap: R${Math.abs(gap).toFixed(2)}</div>`;
-                    }
-                }
-
-                if (isBonolo && prod.stock !== null && prod.stock < 10) {
-                    alertHtml += `<div class="low-stock-alert">📦 Low Stock: Only ${prod.stock} left!</div>`;
-                }
-
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <div class="product-status ${isBonolo ? 'status-winning' : 'status-losing'}">
-                        ${isBonolo ? '🏆 WINNING' : '⚠️ LOSING'}
-                    </div>
-                    
-                    <div class="product-title">${prod.title}</div>
-                    
-                    ${alertHtml}
-                    
-                    <div class="product-info">
-                        <div class="info-row">
-                            <span class="info-label">ASIN:</span>
-                            <span class="info-value">${asin}</span>
-                        </div>
-                        ${prod.sku ? `
-                        <div class="info-row">
-                            <span class="info-label">SKU:</span>
-                            <span class="info-value">${prod.sku}</span>
-                        </div>` : ''}
-                        <div class="info-row">
-                            <span class="info-label">Current Seller:</span>
-                            <span class="info-value">${last ? last.seller : 'N/A'}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Current Price:</span>
-                            <span class="info-value">R${last && last.price ? last.price.toFixed(2) : 'N/A'}</span>
-                        </div>
-                        ${prod.myPrice ? `
-                        <div class="info-row">
-                            <span class="info-label">Your Price:</span>
-                            <span class="info-value">R${prod.myPrice.toFixed(2)}</span>
-                        </div>` : ''}
-                        ${priceGap !== null ? `
-                        <div class="info-row">
-                            <span class="info-label">Price Gap:</span>
-                            <span class="info-value" style="color: ${priceGap > 0 ? '#f87171' : '#4ade80'}">
-                                ${priceGap > 0 ? '+' : ''}R${priceGap}
-                            </span>
-                        </div>` : ''}
-                        ${prod.stock !== null ? `
-                        <div class="info-row">
-                            <span class="info-label">Stock:</span>
-                            <span class="info-value">${prod.stock}</span>
-                        </div>` : ''}
-                    </div>
-                    
-                    <div class="product-actions">
-                        <a href="https://www.amazon.co.za/dp/${asin}" target="_blank" class="view-product-btn">👁️ View Live</a>
-                        <button class="btn-small" onclick="scrapeASIN('${asin}')">🔄 Refresh</button>
-                        <button class="btn-small danger" onclick="deleteProduct('${asin}')">🗑️</button>
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-            });
-
-            if (grid.children.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No products found. Add one above!</p>';
-            }
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            const searchTerm = document.getElementById('searchBarTable').value.toLowerCase();
-            tbody.innerHTML = '';
-
-            Object.entries(allProducts).forEach(([asin, prod]) => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                
-                const matchesSearch = !searchTerm || 
-                    asin.toLowerCase().includes(searchTerm) ||
-                    prod.title.toLowerCase().includes(searchTerm) ||
-                    (last && last.seller.toLowerCase().includes(searchTerm));
-                
-                if (!matchesSearch) return;
-
-                const isBonolo = last && last.seller.toLowerCase().includes('bonolo');
-                const priceGap = (prod.myPrice && last && last.price) ? (prod.myPrice - last.price).toFixed(2) : 'N/A';
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${asin}</td>
-                    <td>${prod.title.substring(0, 50)}...</td>
-                    <td><span class="product-status ${isBonolo ? 'status-winning' : 'status-losing'}">${isBonolo ? 'WINNING' : 'LOSING'}</span></td>
-                    <td>${last ? last.seller : 'N/A'}</td>
-                    <td>R${last && last.price ? last.price.toFixed(2) : 'N/A'}</td>
-                    <td>R${prod.myPrice ? prod.myPrice.toFixed(2) : 'N/A'}</td>
-                    <td style="color: ${priceGap !== 'N/A' && parseFloat(priceGap) > 0 ? '#f87171' : '#4ade80'}">${priceGap !== 'N/A' ? 'R' + priceGap : 'N/A'}</td>
-                    <td>${prod.stock !== null ? prod.stock : 'N/A'}</td>
-                    <td>
-                        <a href="https://www.amazon.co.za/dp/${asin}" target="_blank" class="view-product-btn" style="padding: 5px 10px; font-size: 11px;">View</a>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function updateCompetitors() {
-            const competitors = {};
-            
-            Object.values(allProducts).forEach(prod => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                if (last && !last.seller.toLowerCase().includes('bonolo') && last.seller !== 'N/A') {
-                    competitors[last.seller] = (competitors[last.seller] || 0) + 1;
-                }
-            });
-
-            const sorted = Object.entries(competitors)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-
-            const list = document.getElementById('competitorList');
-            if (sorted.length === 0) {
-                list.innerHTML = '<p style="color: #666; text-align: center;">No competitors found - you\'re winning everything! 🎉</p>';
-                return;
-            }
-
-            list.innerHTML = sorted.map(([seller, count]) => `
-                <div class="competitor-item">
-                    <span class="competitor-name">${seller}</span>
-                    <span class="competitor-count">${count} products</span>
-                </div>
-            `).join('');
-        }
-
-        function updateInsights() {
-            const recommendations = [];
-            
-            Object.entries(allProducts).forEach(([asin, prod]) => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                if (!last || last.seller.toLowerCase().includes('bonolo')) return;
-                
-                const gap = prod.myPrice && last.price ? prod.myPrice - last.price : null;
-                
-                if (gap && gap > 0 && gap < 20) {
-                    const suggested = (last.price - 0.5).toFixed(2);
-                    const reason = gap < 5 ? 'URGENT - Very close to winning!' : 'Medium priority';
-                    
-                    recommendations.push({
-                        asin,
-                        title: prod.title.substring(0, 40),
-                        current: prod.myPrice,
-                        suggested,
-                        gap: gap.toFixed(2),
-                        reason
-                    });
-                }
-            });
-
-            const recDiv = document.getElementById('priceRecommendations');
-            if (recommendations.length === 0) {
-                recDiv.innerHTML = '<p style="color: #666;">No price adjustments recommended at this time.</p>';
-            } else {
-                recDiv.innerHTML = recommendations.map(r => `
-                    <div class="product-card" style="margin-bottom: 15px;">
-                        <div class="product-title">${r.title}</div>
-                        <div class="info-row">
-                            <span class="info-label">ASIN:</span>
-                            <span class="info-value">${r.asin}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Current Price:</span>
-                            <span class="info-value">R${r.current.toFixed(2)}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Suggested Price:</span>
-                            <span class="info-value" style="color: #4ade80;">R${r.suggested}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Gap:</span>
-                            <span class="info-value">R${r.gap}</span>
-                        </div>
-                        <div class="${r.reason.includes('URGENT') ? 'urgent-alert' : 'medium-alert'}">
-                            ${r.reason}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            const lowStock = Object.entries(allProducts).filter(([asin, prod]) => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                const isWinning = last && last.seller.toLowerCase().includes('bonolo');
-                return isWinning && prod.stock !== null && prod.stock < 10;
-            });
-
-            const stockDiv = document.getElementById('lowStockAlerts');
-            if (lowStock.length === 0) {
-                stockDiv.innerHTML = '<p style="color: #666;">No low stock alerts.</p>';
-            } else {
-                stockDiv.innerHTML = lowStock.map(([asin, prod]) => `
-                    <div class="product-card" style="margin-bottom: 15px;">
-                        <div class="low-stock-alert">📦 Only ${prod.stock} units left!</div>
-                        <div class="product-title">${prod.title.substring(0, 50)}</div>
-                        <div class="info-row">
-                            <span class="info-label">ASIN:</span>
-                            <span class="info-value">${asin}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Current Stock:</span>
-                            <span class="info-value">${prod.stock}</span>
-                        </div>
-                        <a href="https://www.amazon.co.za/dp/${asin}" target="_blank" class="view-product-btn" style="margin-top: 10px;">👁️ View Product</a>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function exportPriceAdjustments() {
-            const suggestions = [];
-            
-            Object.entries(allProducts).forEach(([asin, prod]) => {
-                const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
-                if (!last || last.seller.toLowerCase().includes('bonolo')) return;
-                
-                const gap = prod.myPrice && last.price ? prod.myPrice - last.price : null;
-                
-                if (gap && gap > 0) {
-                    suggestions.push({
-                        asin,
-                        sku: prod.sku || '',
-                        title: prod.title,
-                        current: prod.myPrice,
-                        competitor: last.price,
-                        suggested: (last.price - 0.5).toFixed(2),
-                        gap: gap.toFixed(2),
-                        reason: gap < 5 ? 'URGENT - Close to winning' : gap < 20 ? 'Medium priority' : 'Low priority'
-                    });
-                }
-            });
-
-            if (suggestions.length === 0) {
-                alert('No price adjustments to export - you\'re winning everything!');
-                return;
-            }
-
-            const csv = "ASIN,SKU,Product Title,Current Price,Competitor Price,Suggested Price,Gap,Reason\n" + 
-                suggestions.map(s => 
-                    `${s.asin},"${s.sku}","${s.title.replace(/"/g, '')}",${s.current},${s.competitor},${s.suggested},${s.gap},"${s.reason}"`
-                ).join('\n');
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `price_suggestions_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert(`✅ Exported ${suggestions.length} price suggestions!`);
-        }
-
-        function filterProducts() {
-            renderCards();
-        }
-
-        function filterTable() {
-            renderTable();
-        }
+        // Initialize
+        renderAll();
     </script>
 </body>
 </html>
