@@ -419,10 +419,24 @@
             transform: scale(1.05);
             box-shadow: 0 3px 10px rgba(34, 197, 94, 0.4);
         }
+
+        .recovery-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="recoveryBanner" class="recovery-banner hidden">
+            ✅ Data recovered! Found <span id="recoveredCount">0</span> products from previous version.
+        </div>
+
         <header>
             <h1>
                 📊 Amazon Buybox Dashboard
@@ -523,7 +537,50 @@
 
     <script>
         const API_BASE = window.location.origin;
-        let allProducts = JSON.parse(localStorage.getItem('amazonProducts') || '{}');
+        
+        // DATA RECOVERY: Check ALL possible localStorage keys
+        function recoverData() {
+            const possibleKeys = [
+                'amazonProducts',      // New key
+                'products',            // Possible old key
+                'buyboxProducts',      // Possible old key
+                'scrapedProducts'      // Possible old key
+            ];
+            
+            let recovered = null;
+            let recoveredFrom = null;
+            
+            for (const key of possibleKeys) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (Object.keys(parsed).length > 0) {
+                            recovered = parsed;
+                            recoveredFrom = key;
+                            console.log(`✅ Found ${Object.keys(parsed).length} products in localStorage key: ${key}`);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`❌ Failed to parse localStorage key: ${key}`);
+                    }
+                }
+            }
+            
+            if (recovered && recoveredFrom !== 'amazonProducts') {
+                // Migrate to new key
+                localStorage.setItem('amazonProducts', JSON.stringify(recovered));
+                document.getElementById('recoveredCount').textContent = Object.keys(recovered).length;
+                document.getElementById('recoveryBanner').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('recoveryBanner').classList.add('hidden');
+                }, 5000);
+            }
+            
+            return recovered || {};
+        }
+        
+        let allProducts = recoverData();
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
@@ -533,11 +590,9 @@
         });
 
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             
-            // Show selected tab
             if (tabName === 'dashboard') {
                 document.getElementById('dashboardTab').classList.add('active');
                 document.querySelector('.tab:nth-child(1)').classList.add('active');
@@ -570,14 +625,12 @@
             saveProducts();
             renderAll();
 
-            // Clear inputs
             document.getElementById('asinInput').value = '';
             document.getElementById('titleInput').value = '';
             document.getElementById('skuInput').value = '';
             document.getElementById('myPriceInput').value = '';
             document.getElementById('stockInput').value = '';
 
-            // Scrape immediately
             await scrapeASIN(asin);
         }
 
@@ -595,13 +648,11 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     
-                    // Extract title
                     const titleEl = doc.querySelector('#productTitle, h1.a-size-large');
                     if (titleEl && allProducts[asin].title === 'Loading...') {
                         allProducts[asin].title = titleEl.textContent.trim();
                     }
 
-                    // Extract seller
                     let seller = 'N/A';
                     const sellerEl = doc.querySelector('#merchant-info, #sellerProfileTriggerId, .tabular-buybox-text');
                     if (sellerEl) {
@@ -614,7 +665,6 @@
                         }
                     }
 
-                    // Extract price
                     let price = null;
                     const priceEl = doc.querySelector('.a-price .a-offscreen, #priceblock_ourprice, .a-price-whole');
                     if (priceEl) {
@@ -622,7 +672,6 @@
                         price = parseFloat(priceText.replace(',', ''));
                     }
 
-                    // Save data point
                     const dataPoint = {
                         timestamp: new Date().toISOString(),
                         seller: seller,
@@ -738,7 +787,6 @@
                 } else {
                     losing++;
                     
-                    // Check for easy wins (gap < R10)
                     if (prod.myPrice && last.price) {
                         const gap = prod.myPrice - last.price;
                         if (gap > 0 && gap < 10) {
@@ -764,7 +812,6 @@
             Object.entries(allProducts).forEach(([asin, prod]) => {
                 const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
                 
-                // Filter by search
                 const matchesSearch = !searchTerm || 
                     asin.toLowerCase().includes(searchTerm) ||
                     prod.title.toLowerCase().includes(searchTerm) ||
@@ -776,9 +823,7 @@
                 const priceGap = (prod.myPrice && last && last.price) ? (prod.myPrice - last.price).toFixed(2) : null;
                 
                 let alertHtml = '';
-                let alertClass = '';
                 
-                // Priority Alerts
                 if (!isBonolo && priceGap !== null) {
                     const gap = parseFloat(priceGap);
                     if (gap > 0 && gap < 5) {
@@ -788,7 +833,6 @@
                     }
                 }
 
-                // Low Stock Alert
                 if (isBonolo && prod.stock !== null && prod.stock < 10) {
                     alertHtml += `<div class="low-stock-alert">📦 Low Stock: Only ${prod.stock} left!</div>`;
                 }
@@ -864,7 +908,6 @@
             Object.entries(allProducts).forEach(([asin, prod]) => {
                 const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
                 
-                // Filter
                 const matchesSearch = !searchTerm || 
                     asin.toLowerCase().includes(searchTerm) ||
                     prod.title.toLowerCase().includes(searchTerm) ||
@@ -922,7 +965,6 @@
         }
 
         function updateInsights() {
-            // Price Recommendations
             const recommendations = [];
             
             Object.entries(allProducts).forEach(([asin, prod]) => {
@@ -976,7 +1018,6 @@
                 `).join('');
             }
 
-            // Low Stock Alerts
             const lowStock = Object.entries(allProducts).filter(([asin, prod]) => {
                 const last = prod.last || (prod.points.length ? prod.points[prod.points.length - 1] : null);
                 const isWinning = last && last.seller.toLowerCase().includes('bonolo');
